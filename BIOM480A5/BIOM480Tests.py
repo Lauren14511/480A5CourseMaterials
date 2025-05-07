@@ -942,7 +942,25 @@ def durbin_watson_test(residuals, n_params):
 # Mariana S will present on the topic of Point-Biserial correlation test, creating function named 'pointbiserialr' 
 
 #*********************
-# Dylan S will present on the topic of Barnard’s exact test, creating function named 'barnard_exact' 
+# Dylan S will present on the topic of Barnard’s exact test, creating function named 'barnard_exact'
+
+from statsmodels.stats.contingency_tables import Table2x2
+
+def barnard_exact(table):
+    '''
+    Perform Barnard’s Exact Test on a 2x2 contingency table.
+
+    Parameters:
+    table : array_like
+        A 2x2 table, such as [[a, b], [c, d]]
+
+    Returns:
+    p_value : float
+        The p-value from Barnard’s Exact Test
+    '''
+    tbl = Table2x2(table)
+    result = tbl.test_nominal_association(method="barnard")
+    return result.pvalue
 
 #*********************
 # Jacob S will present on the topic of Pearson correlation test, crating function named 'pearsonr' 
@@ -1032,7 +1050,60 @@ def kendalltau(x, y):
     return tau, p_value
 #*********************
 # Alvina Y will present on the topic of F-test for overall regression, creating function named 'f_test' 
-
+def ftest(y_true, y_pred, n_predictors):
+    '''
+    Perform an F-test for overall significance of regression.
+    
+    Parameters:
+    y_true : array_like
+        Observed/true dependent variable values.
+    y_pred : array_like
+        Predicted values from regression model.
+    n_predictors : int
+        Number of predictor variables in the model (excluding intercept).
+        
+    Returns:
+    f_stat : float
+        The calculated F-statistic.
+    p_value : float
+        The p-value for the F-test.  
+        
+    Example:
+    >>> y_true = [1, 2, 3, 4, 5]
+    >>> y_pred = [1.1, 2.2, 2.9, 4.1, 4.8]
+    >>> n_predictors = 2
+    >>> f_stat, p_value = ftest(y_true, y_pred, n_predictors)
+    >>> print(f_stat)
+    185.71428571428572
+    >>> print(p_value)
+    0.000583853374492769
+    
+    Notes:
+    - Tests H0: All regression coefficients (except intercept) are zero.
+    - Uses scipy.stats.f.sf for p-value calculation.
+    '''
+    import numpy as np
+    from scipy.stats import f
+    
+    y_true = np.asarray(y_true)
+    y_pred = np.asarray(y_pred)
+    n_obs = len(y_true)
+    
+    # Calculate sums of squares
+    ssr = np.sum((y_pred - np.mean(y_true))**2)  # Regression SS
+    sse = np.sum((y_true - y_pred)**2)           # Error SS
+    
+    # Degrees of freedom
+    df_reg = n_predictors
+    df_resid = n_obs - n_predictors - 1
+    
+    # F-statistic
+    f_stat = (ssr / df_reg) / (sse / df_resid)
+    
+    # P-value (right-tailed F-test)
+    p_value = f.sf(f_stat, df_reg, df_resid)
+    
+    return f_stat, p_value
 #*********************
 # Polina Z will present on the topic of Harvey-Collier test, creating function named 'harvey_collier'
 
